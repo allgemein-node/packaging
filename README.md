@@ -29,3 +29,8 @@ Tasks:
 gulp --tasks
 ```
 
+* **package** - compiles and packages all sources under "src" to an npm  package
+* **packagePublish** - publishes a package to npm registry
+* **vpatch** - Increments patch version 
+* **vminor** - Increments minor version
+* **vmajor** - Increments major version
