@@ -21,7 +21,6 @@
     "@types/chai": "^4.2.4",
     "@types/mocha": "^5.2.7",
     "codelyzer": "^5.2.0",
-    "compare-versions": "^3.5.1",
     "mocha": "^6.2.2",
     "mocha-typescript": "^1.1.17",
     "chai": "^4.2.0",
