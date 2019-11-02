@@ -117,7 +117,7 @@ const pathToPackage = dirname(pathToPackageJsonPath);
 if (!pathToPackageJsonPath) {
   throw new Error('can\'t find path to project package json');
 }
-const pathToPackagingJson = require(allgPackagingJsonPath);
+const pathToPackagingJson = require(pathToPackageJsonPath);
 
 const skipPkg = ['mocha', 'chai', 'mocha-typescript', 'typescript', 'ts-node'];
 
@@ -150,7 +150,7 @@ for (const dep of Object.keys(allgPackagingJson.devDependencies)) {
 if (changes.length > 0) {
   console.log('Update dev dependencies in ' + pathToPackageJsonPath);
   console.log(changes.map(x => ' - ' + x).join('\n'));
-  writeFileSync(pathToPackageJsonPath, JSON.stringify(pathToPackageJsonPath, null, 2));
+  writeFileSync(pathToPackageJsonPath, JSON.stringify(pathToPackagingJson, null, 2));
   console.log('Run `npm install` to install packages.');
 } else {
   console.log('All dev dependencies are installed.');
