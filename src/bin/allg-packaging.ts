@@ -133,7 +133,7 @@ for (const dep of Object.keys(allgPackagingJson.devDependencies)) {
   }
 
   if (!pathToPackagingJson.devDependencies.hasOwnProperty(dep)) {
-    pathToPackagingJson[dep] = allgPackagingJson.devDependencies[dep];
+    pathToPackagingJson.devDependencies[dep] = allgPackagingJson.devDependencies[dep];
     changes.push('add ' + dep + ' ' + allgPackagingJson.devDependencies[dep]);
   } else {
     const versionSrc = allgPackagingJson.devDependencies[dep].replace(/\^|>|<|=/g, '');
@@ -141,7 +141,7 @@ for (const dep of Object.keys(allgPackagingJson.devDependencies)) {
 
     if (compareVersions(versionDest, versionSrc) < 0) {
       // update version
-      pathToPackagingJson[dep] = versionSrc;
+      pathToPackagingJson.devDependencies[dep] = versionSrc;
       changes.push('update ' + dep + ' ' + allgPackagingJson.devDependencies[dep]);
     }
   }
