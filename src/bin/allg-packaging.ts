@@ -156,18 +156,19 @@ if (changes.length > 0) {
   console.log('All dev dependencies are installed.');
 }
 
-if (!existsSync(join(pathToPackage, 'gulpfile.ts'))) {
+if (!existsSync(join(pathToPackage, 'gulpfile.js'))) {
   console.log('Install gulpfile.ts');
   const str = `import * as glob from 'glob';
 [
-  ...glob.sync('node_modules/*/gulp/*'),
+  ...glob.sync('node_modules/*/*/gulp/*.js'),
+  ...glob.sync('node_modules/*/gulp/*.js'),
   ...glob.sync('src/gulp/*'),
   ...glob.sync('gulp/*'),
 ]
   .filter(x => !/@types\\//.test(x))
   .map(x => require('./' + x));
 `;
-  writeFileSync(join(pathToPackage, 'gulpfile.ts'), str);
+  writeFileSync(join(pathToPackage, 'gulpfile.js'), str);
 
 } else {
   console.log('gulpfile.ts exists already');
