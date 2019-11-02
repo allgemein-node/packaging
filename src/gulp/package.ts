@@ -52,6 +52,14 @@ gulp.task('packageCopyReadme', () => {
 });
 
 /**
+ * Copies LICENSE into the package.
+ */
+gulp.task('packageCopyLicense', () => {
+  return gulp.src('./LICENSE')
+    .pipe(gulp.dest('./build/package'));
+});
+
+/**
  * Copies README.md into the package.
  */
 gulp.task('packageCopyJsons', () => {
@@ -94,7 +102,8 @@ gulp.task('package', gulp.series(
   'packageCopyFiles',
   'packageReplaceReferences',
   'packagePreparePackageFile',
-  'packageCopyReadme'
+  'packageCopyReadme',
+  'packageCopyLicense'
 ));
 
 /**
@@ -108,7 +117,9 @@ gulp.task('packageNoClean', gulp.series(
     'packageCopyFiles',
     'packageReplaceReferences',
     'packagePreparePackageFile',
-    'packageCopyReadme')
+    'packageCopyReadme',
+    'packageCopyLicense'
+  )
 ));
 
 
