@@ -37,8 +37,7 @@ gulp.task('packageCompile', () => {
  */
 gulp.task('packageReplaceReferences', () => {
   return gulp.src('./build/package/**/*.d.ts')
-    .pipe(replace(`/// <reference types="node" />`, ''))
-    .pipe(replace(`/// <reference types="chai" />`, ''))
+    .pipe(replace(/\/\/\/\s+<reference\s+types="[^"]*"\s+\/>/g, ''))
     .pipe(gulp.dest('./build/package'));
 });
 
