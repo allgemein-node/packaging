@@ -34,3 +34,5 @@ gulp --tasks
 * **vpatch** - Increments patch version 
 * **vminor** - Increments minor version
 * **vmajor** - Increments major version
+* **packages** - build packages for content in "./packages" directory 
+* **packagesPublis** - published packages build from "./packages" 
