@@ -19,7 +19,6 @@ gulp.task('packageCompile', () => {
   const tsResult = gulp.src([
     './src/**/*.ts',
     '!./src/**/files/*.ts',
-    // "./node_modules/@types/**/*.ts"
   ])
     .pipe(sourcemaps.init())
     .pipe(tsProject());
