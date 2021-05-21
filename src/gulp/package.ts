@@ -2,6 +2,7 @@ import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
 import * as shell from 'gulp-shell';
 import * as sourcemaps from 'gulp-sourcemaps';
+// @ts-ignore
 import * as replace from 'gulp-replace';
 
 const m = require('merge-stream');
@@ -84,7 +85,7 @@ gulp.task('packageCopyBin', () => {
  */
 gulp.task('packagePreparePackageFile', () => {
   return gulp.src('./package.json')
-    .pipe(replace('"private": true,', '"private": false,'))
+    .pipe(replace('"private": true', '"private": false'))
     .pipe(gulp.dest('./build/package'));
 });
 
