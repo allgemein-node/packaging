@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/thinkbaer/node-allgemein-packaging.git"
   },
+  "scripts": {
+    "test": "mocha test/functional/*.spec.ts"
+  },
   "author": "Robert Kania",
   "license": "MIT",
   "bin": {
