@@ -1,9 +1,8 @@
 import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
-import * as shell from 'gulp-shell';
+import shell from 'gulp-shell';
 import * as sourcemaps from 'gulp-sourcemaps';
-// @ts-ignore
-import * as replace from 'gulp-replace';
+import replace from 'gulp-replace';
 
 const m = require('merge-stream');
 

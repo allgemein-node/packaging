@@ -1,10 +1,10 @@
 import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
 import * as sourcemaps from 'gulp-sourcemaps';
-import * as shell from 'gulp-shell';
-import * as replace from 'gulp-replace';
+import shell from 'gulp-shell';
+import replace from 'gulp-replace';
 import * as fs from 'fs';
-import * as del from 'del';
+import del from 'del';
 
 const m = require('merge-stream');
 

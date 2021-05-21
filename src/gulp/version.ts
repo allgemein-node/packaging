@@ -1,5 +1,5 @@
 import * as gulp from 'gulp';
-import * as bump from 'gulp-bump';
+import bump from 'gulp-bump';
 
 
 // -------------------------------------------------------------------------

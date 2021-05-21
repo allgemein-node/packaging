@@ -1,5 +1,5 @@
 import * as gulp from 'gulp';
-import * as del from 'del';
+import del from 'del';
 
 
 gulp.task('clean', () => {
