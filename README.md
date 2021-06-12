@@ -1,4 +1,4 @@
-# node-allgemein-packaging
+# @allgemein/packaging
 
 Use 
 ``` 
@@ -29,10 +29,8 @@ Tasks:
 gulp --tasks
 ```
 
-* **package** - compiles and packages all sources under "src" to an npm  package
-* **packagePublish** - publishes a package to npm registry
+* **package** - compiles and packages all packages under packages
+* **publish** - publishes a package to npm registry
 * **vpatch** - Increments patch version 
 * **vminor** - Increments minor version
 * **vmajor** - Increments major version
-* **packages** - build packages for content in "./packages" directory 
-* **packagesPublis** - published packages build from "./packages" 
