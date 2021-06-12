@@ -34,59 +34,45 @@ gulp.task('packageCompile', () => {
 /**
  * Removes /// <reference from compiled sources.
  */
-gulp.task('packageReplaceReferences', () => {
-  return gulp.src('./build/package/**/*.d.ts')
-    .pipe(replace(/\/\/\/\s+<reference\s+types="[^"]*"\s+\/>/g, ''))
-    .pipe(gulp.dest('./build/package'));
-});
+gulp.task('packageReplaceReferences', () => gulp.src('./build/package/**/*.d.ts')
+  .pipe(replace(/\/\/\/\s+<reference\s+types="[^"]*"\s+\/>/g, ''))
+  .pipe(gulp.dest('./build/package')));
 
 /**
  * Copies README.md into the package.
  */
-gulp.task('packageCopyReadme', () => {
-  return gulp.src('./README.md')
-    .pipe(replace(/```typescript([\s\S]*?)```/g, '```javascript$1```'))
-    .pipe(gulp.dest('./build/package'));
-});
+gulp.task('packageCopyReadme', () => gulp.src('./README.md')
+  .pipe(replace(/```typescript([\s\S]*?)```/g, '```javascript$1```'))
+  .pipe(gulp.dest('./build/package')));
 
 /**
  * Copies LICENSE into the package.
  */
-gulp.task('packageCopyLicense', () => {
-  return gulp.src('./LICENSE')
-    .pipe(gulp.dest('./build/package'));
-});
+gulp.task('packageCopyLicense', () => gulp.src('./LICENSE')
+  .pipe(gulp.dest('./build/package')));
 
 /**
  * Copies README.md into the package.
  */
-gulp.task('packageCopyJsons', () => {
-  return gulp.src('./src/**/*.json').pipe(gulp.dest('./build/package'));
-});
+gulp.task('packageCopyJsons', () => gulp.src('./src/**/*.json').pipe(gulp.dest('./build/package')));
 
 /**
  * Copies README.md into the package.
  */
-gulp.task('packageCopyFiles', () => {
-  return gulp.src('./src/**/files/*').pipe(gulp.dest('./build/package'));
-});
+gulp.task('packageCopyFiles', () => gulp.src('./src/**/files/*').pipe(gulp.dest('./build/package')));
 
 /**
  * Copies Bin files.
  */
-gulp.task('packageCopyBin', () => {
-  return gulp.src('./bin/*').pipe(gulp.dest('./build/package/bin'));
-});
+gulp.task('packageCopyBin', () => gulp.src('./bin/*').pipe(gulp.dest('./build/package/bin')));
 
 
 /**
  * Copy package.json file to the package.
  */
-gulp.task('packagePreparePackageFile', () => {
-  return gulp.src('./package.json')
-    .pipe(replace('"private": true', '"private": false'))
-    .pipe(gulp.dest('./build/package'));
-});
+gulp.task('packagePreparePackageFile', () => gulp.src('./package.json')
+  .pipe(replace('"private": true', '"private": false'))
+  .pipe(gulp.dest('./build/package')));
 
 
 /**
@@ -135,19 +121,15 @@ gulp.task('packageNoClean', gulp.series(
 /**
  * Publishes a package to npm from ./build/package directory.
  */
-gulp.task('packagePublish', () => {
-  return gulp.src('package.json', {read: false})
-    .pipe(shell([
-      'cd ./build/package && npm publish --access=public'
-    ]));
-});
+gulp.task('packagePublish', () => gulp.src('package.json', {read: false})
+  .pipe(shell([
+    'cd ./build/package && npm publish --access=public'
+  ])));
 
 /**
  * Publishes a package to npm from ./build/package directory with @next tag.
  */
-gulp.task('packagePublishNext', () => {
-  return gulp.src('package.json', {read: false})
-    .pipe(shell([
-      'cd ./build/package && npm publish --tag next --access=public'
-    ]));
-});
+gulp.task('packagePublishNext', () => gulp.src('package.json', {read: false})
+  .pipe(shell([
+    'cd ./build/package && npm publish --tag next --access=public'
+  ])));

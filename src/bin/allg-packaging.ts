@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import {existsSync, writeFileSync} from 'fs';
 import {dirname, join} from 'path';
 
