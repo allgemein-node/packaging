@@ -1,5 +1,5 @@
 import {join, resolve} from 'path';
-import {has, keys, set, uniq, unset} from 'lodash';
+import {has, isEmpty, keys, set, uniq, unset} from 'lodash';
 import * as glob from 'glob';
 import * as gulp from 'gulp';
 import shell from 'gulp-shell';
@@ -115,21 +115,28 @@ const applyImports = function (packageJsonFile: string, importPackages: string[]
 
 
 const packages = glob.sync('./packages/*/package.json');
-const packageNames = [];
-const updateDeps = [];
-const testDeps = [];
-const publishDeps = [];
 
+
+const packageTasks: { [k: string]: string[] } = {
+  'packages': [],
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'update_dependencies': [],
+  'test': [],
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'packages_publish': []
+};
+
+const packageNames = packageTasks['packages'];
+const updateDeps = packageTasks['update_dependencies'];
+const testDeps = packageTasks['test'];
+const publishDeps = packageTasks['packages_publish'];
 
 for (const path of packages) {
   const dirName = path.match(/packages\/(.*)\/package/)[1];
   const sourcePath = resolve(join('packages', dirName));
-
   const buildPath = resolve(join('build', 'packages', dirName));
   const buildOut = join(buildPath, 'out');
   const buildTmp = join(buildPath, 'tmp');
-  // const json = JSON.parse(fs.readFileSync(path).toString('utf-8'));
-  // const name = json.name.replace(/^@/, '').replace(/[^\w]+/g, '-');
 
   /**
    * cleans build folder.
@@ -355,7 +362,9 @@ if (fs.existsSync(angularJsonPath)) {
   }
 }
 
-gulp.task('update_dependencies', gulp.series(...updateDeps));
-gulp.task('package', gulp.series(...packageNames));
-gulp.task('test', gulp.series(...testDeps));
-gulp.task('publish', gulp.series(...publishDeps));
+
+for (const taskGroup of keys(packageTasks)) {
+  if (!isEmpty(packageTasks[taskGroup])) {
+    gulp.task(taskGroup, gulp.series(...packageTasks[taskGroup]));
+  }
+}
