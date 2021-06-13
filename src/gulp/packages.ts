@@ -207,14 +207,18 @@ for (const path of packages) {
     taskName = 'package_ng_build__' + dirName;
     taskNames.push(taskName);
     gulp.task(taskName, () => {
-      fs.copyFileSync(path, packageBack);
-      fs.copyFileSync(tmpPackagePath, path);
+      if (!fs.existsSync(packageBack)) {
+        fs.copyFileSync(path, packageBack);
+        fs.copyFileSync(tmpPackagePath, path);
+      }
       return gulp.src(path, {read: false})
         .pipe(shell('ng build ' + ngLibName, {cwd: sourcePath}))
         .pipe(
           through.obj((chunk, enc, callback) => {
-            fs.copyFileSync(packageBack, path);
-            fs.unlinkSync(packageBack);
+            if (fs.existsSync(packageBack)) {
+              fs.copyFileSync(packageBack, path);
+              fs.unlinkSync(packageBack);
+            }
             callback(null, chunk);
           })
         );
