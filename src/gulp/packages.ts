@@ -9,12 +9,10 @@ import del from 'del';
 import replace from 'gulp-replace';
 import * as ts from 'gulp-typescript';
 import * as sourcemaps from 'gulp-sourcemaps';
+import {getJson, sortByDependencies} from './functions';
 
 const m = require('merge-stream');
 
-function getJson(path = './package.json') {
-  return JSON.parse(fs.readFileSync(path).toString('utf-8'));
-}
 
 function extractTsImports(content: string) {
   const reg = /^import.*from.*'([^']+)';/mg;
@@ -114,7 +112,10 @@ const applyImports = function (packageJsonFile: string, importPackages: string[]
 // -------------------------------------------------------------------------
 
 
-const packages = glob.sync('./packages/*/package.json');
+let packages = glob.sync('./packages/*/package.json');
+if (packages.length > 0) {
+  packages = sortByDependencies(packages);
+}
 
 
 const packageTasks: { [k: string]: string[] } = {
