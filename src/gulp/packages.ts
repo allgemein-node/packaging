@@ -190,7 +190,6 @@ for (const path of packages) {
   if (fs.existsSync(angularJsonPath)) {
     const angularJson = getJson(angularJsonPath);
     const ngLibName = angularJson.defaultProject;
-    const packageBack = join(sourcePath, 'package-tmp.json');
 
     taskName = 'package_ng_build__' + dirName;
     taskNames.push(taskName);
