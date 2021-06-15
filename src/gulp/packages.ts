@@ -183,21 +183,8 @@ for (const path of packages) {
     'update_dependencies_dev__' + dirName
   ));
 
-  /**
-   * set package.json with correct version
-   */
-  taskName = 'package_apply_version__' + dirName;
-  taskNames.push(taskName);
-  gulp.task(taskName, () => {
-    const mainPackageJson = getJson();
-    const version = mainPackageJson.version;
-    return gulp.src(path)
-      .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
-      .pipe(gulp.dest(buildTmp));
-  });
 
-
-  const tmpPackagePath = join(buildTmp, 'package.json');
+  // const tmpPackagePath = join(buildTmp, 'package.json');
   const angularJsonPath = join(sourcePath, 'angular.json');
   // const ngPackagePath = join(sourcePath, 'ng-package.json');
   if (fs.existsSync(angularJsonPath)) {
@@ -207,23 +194,13 @@ for (const path of packages) {
 
     taskName = 'package_ng_build__' + dirName;
     taskNames.push(taskName);
-    gulp.task(taskName, () => {
-      if (!fs.existsSync(packageBack)) {
-        fs.copyFileSync(path, packageBack);
-        fs.copyFileSync(tmpPackagePath, path);
-      }
-      return gulp.src(path, {read: false})
-        .pipe(shell('ng build ' + ngLibName, {cwd: sourcePath}))
-        .pipe(
-          through.obj((chunk, enc, callback) => {
-            if (fs.existsSync(packageBack)) {
-              fs.copyFileSync(packageBack, path);
-              fs.unlinkSync(packageBack);
-            }
-            callback(null, chunk);
-          })
-        );
-    });
+    gulp.task(taskName, () => gulp.src(path, {read: false})
+      .pipe(shell('ng build ' + ngLibName, {cwd: sourcePath}))
+      .pipe(
+        through.obj((chunk, enc, callback) => {
+          callback(null, chunk);
+        })
+      ));
 
     /**
      * Tests
@@ -239,7 +216,7 @@ for (const path of packages) {
 
     taskName = 'package_nodejs__' + dirName;
     taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src(tmpPackagePath)
+    gulp.task(taskName, () => gulp.src(path)
       .pipe(through.obj(function (file, enc, cb) {
 
         if (file.isNull()) {
@@ -288,6 +265,20 @@ for (const path of packages) {
           .pipe(sourcemaps.write('.', {sourceRoot: '', includeContent: true}))
           .pipe(gulp.dest(buildOut))
       );
+    });
+
+    /**
+     * set package.json with correct version
+     */
+    const outPackagePath = join(buildOut, 'package.json');
+    taskName = 'package_apply_version__' + dirName;
+    taskNames.push(taskName);
+    gulp.task(taskName, () => {
+      const mainPackageJson = getJson();
+      const version = mainPackageJson.version;
+      return gulp.src(outPackagePath)
+        .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
+        .pipe(gulp.dest(buildOut));
     });
 
 
