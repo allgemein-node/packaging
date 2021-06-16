@@ -325,7 +325,7 @@ for (const path of packages) {
       if(has(packageJson, 'scripts.test')){
         gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
       }else{
-        gulp.task(taskName, shell.task('mocha ' + searchPath));
+        gulp.task(taskName, shell.task('mocha ' + join('test', '{**,**/**,**/**/**}', '*.spec.ts'),  {cwd: sourcePath}));
       }
       if(has(packageJson, 'scripts.posttest')){
         taskName = 'posttest__' + dirName;
