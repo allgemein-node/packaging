@@ -138,6 +138,7 @@ for (const path of packages) {
   const buildPath = resolve(join('build', 'packages', dirName));
   const buildOut = join(buildPath, 'out');
   const buildTmp = join(buildPath, 'tmp');
+  const packageJson = getJson(path);
 
   /**
    * cleans build folder.
@@ -204,11 +205,20 @@ for (const path of packages) {
     /**
      * Tests
      */
-    const foundTestFiles = glob.sync(join(sourcePath, 'src', '**', '*.spec.ts'));
+    const searchPath = join(sourcePath, 'src', '{**,**/**,**/**/**}', '*.spec.ts');
+    const foundTestFiles = glob.sync(searchPath);
     if (foundTestFiles.length > 0) {
       taskName = 'test__' + dirName;
       testDeps.push(taskName);
-      gulp.task(taskName, shell.task('ng test ' + ngLibName + ' --code-coverage=true --watch=false', {cwd: sourcePath}));
+      if(has(packageJson, 'scripts.test')){
+        gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
+      }else{
+        gulp.task(taskName, shell.task('ng test ' + ngLibName + ' --code-coverage=true --watch=false', {cwd: sourcePath}));
+      }
+      if(has(packageJson, 'scripts.posttest')){
+        taskName = 'posttest__' + dirName;
+        gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
+      }
     }
 
   } else {
@@ -307,11 +317,20 @@ for (const path of packages) {
     /**
      * Test
      */
-    const foundTestFiles = glob.sync(join(sourcePath, 'test', '**', '*.spec.ts'));
+    const searchPath = join(sourcePath, 'test', '{**,**/**,**/**/**}', '*.spec.ts');
+    const foundTestFiles = glob.sync(searchPath);
     if (foundTestFiles.length > 0) {
       taskName = 'test__' + dirName;
       testDeps.push(taskName);
-      gulp.task(taskName, shell.task(`nyc mocha ./packages/${dirName}/test/**/*.spec.ts`));
+      if(has(packageJson, 'scripts.test')){
+        gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
+      }else{
+        gulp.task(taskName, shell.task('mocha ' + searchPath));
+      }
+      if(has(packageJson, 'scripts.posttest')){
+        taskName = 'posttest__' + dirName;
+        gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
+      }
     }
   }
 
