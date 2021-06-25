@@ -1,6 +1,7 @@
 import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
 import shell from 'gulp-shell';
+import {resolve} from 'path';
 import * as sourcemaps from 'gulp-sourcemaps';
 import replace from 'gulp-replace';
 
@@ -90,6 +91,7 @@ gulp.task('package', gulp.series(
   'packageCopyLicense'
 ));
 
+
 /**
  * Creates a package that can be published to npm.
  */
@@ -105,6 +107,12 @@ gulp.task('packageNoClean', gulp.series(
     'packageCopyLicense'
   )
 ));
+
+gulp.task('pack', shell.task([
+  'npm pack',
+  'mv *.tgz ../',
+  'cp *.tgz main.tgz'
+], {cwd: resolve('./build/package')}));
 
 
 // gulp.task('watchPackage', () => {
