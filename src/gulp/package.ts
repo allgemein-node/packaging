@@ -110,8 +110,8 @@ gulp.task('packageNoClean', gulp.series(
 
 gulp.task('pack', shell.task([
   'npm pack',
-  'mv *.tgz ../',
-  'cp *.tgz main.tgz'
+  'cp *.tgz main.tgz',
+  'mv *.tgz ../'
 ], {cwd: resolve('./build/package')}));
 
 
