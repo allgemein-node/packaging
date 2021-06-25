@@ -124,7 +124,8 @@ const packageTasks: { [k: string]: string[] } = {
   'update_dependencies': [],
   'test': [],
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  'packages_publish': []
+  'packages_publish': [],
+  'pack': []
 };
 
 const packageNames = packageTasks['packages'];
@@ -210,12 +211,12 @@ for (const path of packages) {
     if (foundTestFiles.length > 0) {
       taskName = 'test__' + dirName;
       testDeps.push(taskName);
-      if(has(packageJson, 'scripts.test')){
+      if (has(packageJson, 'scripts.test')) {
         gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
-      }else{
+      } else {
         gulp.task(taskName, shell.task('ng test ' + ngLibName + ' --code-coverage=true --watch=false', {cwd: sourcePath}));
       }
-      if(has(packageJson, 'scripts.posttest')){
+      if (has(packageJson, 'scripts.posttest')) {
         taskName = 'posttest__' + dirName;
         gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
       }
@@ -322,12 +323,12 @@ for (const path of packages) {
     if (foundTestFiles.length > 0) {
       taskName = 'test__' + dirName;
       testDeps.push(taskName);
-      if(has(packageJson, 'scripts.test')){
+      if (has(packageJson, 'scripts.test')) {
         gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
-      }else{
-        gulp.task(taskName, shell.task('mocha ' + join('test', '{**,**/**,**/**/**}', '*.spec.ts'),  {cwd: sourcePath}));
+      } else {
+        gulp.task(taskName, shell.task('mocha ' + join('test', '{**,**/**,**/**/**}', '*.spec.ts'), {cwd: sourcePath}));
       }
-      if(has(packageJson, 'scripts.posttest')){
+      if (has(packageJson, 'scripts.posttest')) {
         taskName = 'posttest__' + dirName;
         gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
       }
@@ -337,6 +338,12 @@ for (const path of packages) {
   taskName = 'package__' + dirName;
   packageNames.push(taskName);
   gulp.task(taskName, gulp.series(...taskNames));
+
+  taskName = 'pack__' + dirName;
+  packageTasks.pack.push(taskName);
+  gulp.task(taskName, shell.task([
+    'npm pack',
+    'cp *.tar.gz ../' + dirName + '.tar.gz'], {cwd: buildOut}));
 
   taskName = 'publish__' + dirName;
   publishDeps.push(taskName);
