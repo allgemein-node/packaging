@@ -324,7 +324,7 @@ for (const path of packages) {
       './src/bin/**'
     ], {cwd: sourcePath}).pipe(gulp.dest(buildOut + '/bin')));
 
-    taskName = 'package_copy_README__' + dirName;
+    taskName = 'package_copy_readme__' + dirName;
     taskNames.push(taskName);
     gulp.task(taskName, () => gulp.src([
       './README.md',
