@@ -30,12 +30,12 @@ export class AllgemeinPackagingSpec {
     // by name
     // const x = sortDependenciesFn({name: 'hallo', deps:[]}, {name: 'ballo', deps:[]});
     const data = sortByDependencies([
-      './test/functional/data/package_d01.json',
-      './test/functional/data/package_d02.json'
+      './test/functional/data/package_d01_none.json',
+      './test/functional/data/package_d02_none.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d01.json',
-      './test/functional/data/package_d02.json']);
+      './test/functional/data/package_d01_none.json',
+      './test/functional/data/package_d02_none.json']);
 
   }
 
@@ -45,12 +45,12 @@ export class AllgemeinPackagingSpec {
     // by name
     // const x = sortDependenciesFn({name: 'hallo', deps:[]}, {name: 'ballo', deps:[]});
     const data = sortByDependencies([
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d02.json'
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d02_none.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json']);
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json']);
 
   }
 
@@ -61,48 +61,81 @@ export class AllgemeinPackagingSpec {
     // by name
     // const x = sortDependenciesFn({name: 'hallo', deps:[]}, {name: 'ballo', deps:[]});
     let data = sortByDependencies([
-      './test/functional/data/package_d04.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d02.json'
+      './test/functional/data/package_d04_d03.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d02_none.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json'
     ]);
 
     data = sortByDependencies([
-      './test/functional/data/package_d04.json',
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json'
+      './test/functional/data/package_d04_d03.json',
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json'
     ]);
 
     data = sortByDependencies([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json'
     ]);
 
     data = sortByDependencies([
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d04_d03.json'
     ]);
     expect(data).to.deep.eq([
-      './test/functional/data/package_d02.json',
-      './test/functional/data/package_d03.json',
-      './test/functional/data/package_d04.json'
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json'
+    ]);
+
+    data = sortByDependencies([
+      './test/functional/data/package_d05_d04_d03.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d04_d03.json',
+    ]);
+    expect(data).to.deep.eq([
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json',
+      './test/functional/data/package_d05_d04_d03.json'
     ]);
 
   }
+
+
+
+  @test
+  async 'sort by multi deep deps'() {
+    const data = sortByDependencies([
+      './test/functional/data/package_d05_d04_d03.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json',
+      './test/functional/data/package_d02_none.json',
+    ]);
+    expect(data).to.deep.eq([
+      './test/functional/data/package_d02_none.json',
+      './test/functional/data/package_d03_d02.json',
+      './test/functional/data/package_d04_d03.json',
+      './test/functional/data/package_d05_d04_d03.json'
+    ]);
+
+  }
+
 }
