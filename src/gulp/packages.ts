@@ -344,7 +344,7 @@ for (const path of packages) {
   gulp.task(taskName, shell.task([
     'npm pack',
     'cp *.tgz ' + dirName + '.tgz',
-    'mv ' + dirName + '.tgz'
+    'mv ' + dirName + '.tgz ../../'
   ], {cwd: buildOut}));
 
   taskName = 'publish__' + dirName;
