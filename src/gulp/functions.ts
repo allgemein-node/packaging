@@ -1,4 +1,4 @@
-import {keys, orderBy, uniq} from 'lodash';
+import {has, keys, uniq} from 'lodash';
 import fs from 'fs';
 
 export function getJson(path = './package.json') {
@@ -18,26 +18,56 @@ export const sortDependenciesFn = (a: any, b: any) => {
 
 };
 
+interface IPackageData {
+  name: string;
+  path: string;
+  deps: string[];
+  weight: number;
+  cycle: number;
+}
+
 export const sortByDependencies = function (packageJsonPaths: string[]) {
-  let entries: { name: string; path: string; deps: string[]; weight: number }[] = [];
+  const entries: IPackageData[] = [];
   for (const pjPath of packageJsonPaths) {
     const packageJson = getJson(pjPath);
-    const entry: any = {name: packageJson.name, path: pjPath, deps: [], weight: 0};
-    if (keys(packageJson.dependencies).length > 0) {
-      entry.deps.push(...keys(packageJson.dependencies));
-    }
-    if (keys(packageJson.peerDependencies).length > 0) {
-      entry.deps.push(...keys(packageJson.peerDependencies));
+    const entry: any = {name: packageJson.name, path: pjPath, deps: [], weight: 0, cycle: 20};
+    const depKeys = ['dependencies', 'peerDependencies', 'optionalDependencies'];
+    for (const depKey of depKeys) {
+      if (!has(packageJson, depKey)) {
+        continue;
+      }
+      const _keys = keys(packageJson[depKey]);
+      if (_keys && _keys.length > 0) {
+        entry.deps.push(..._keys);
+      }
     }
     entry.deps = uniq(entry.deps);
     entries.push(entry);
   }
 
-  for (const entry of entries) {
-    const dependents = entries.filter(x => x.deps.includes(entry.name));
-    dependents.map(x => x.weight += (entry.weight + 1));
-  }
+  const tmpOrder: IPackageData[] = [];
+  while (entries.length > 0) {
+    const entry = entries.shift();
+    const res = entry.cycle--;
+    if (res < 0) {
+      // if cycle push
+      tmpOrder.push(entry);
+      continue;
+    }
+    if (entry.deps.length === 0) {
+      // no deps then push
+      tmpOrder.push(entry);
+    } else {
+      // has deps
+      // are deps in entries
 
-  entries = orderBy(entries, ['weight', 'name']);
-  return entries.map(x => x.path);
+      const hasUnprocessedDeps = entry.deps.reduce((p, c) => p || !!entries.find(x => x.name === c), false);
+      if (hasUnprocessedDeps) {
+        entries.push(entry);
+      } else {
+        tmpOrder.push(entry);
+      }
+    }
+  }
+  return tmpOrder.map(x => x.path);
 };
