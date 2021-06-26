@@ -111,6 +111,7 @@ const applyImports = function (packageJsonFile: string, importPackages: string[]
 // Package
 // -------------------------------------------------------------------------
 
+const mainPackageJson = getJson();
 
 let packages = glob.sync('./packages/*/package.json');
 if (packages.length > 0) {
@@ -335,16 +336,32 @@ for (const path of packages) {
     }
   }
 
+  /**
+   * set package.json with correct version
+   */
+  const outPackagePath = join(buildOut, 'package.json');
+  taskName = 'package_apply_version__' + dirName;
+  packageNames.push(taskName);
+  gulp.task(taskName, () => {
+    const version = mainPackageJson.version;
+    return gulp.src(outPackagePath)
+      .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
+      .pipe(gulp.dest(buildOut));
+  });
+
+
   taskName = 'package__' + dirName;
   packageNames.push(taskName);
   gulp.task(taskName, gulp.series(...taskNames));
 
+  const version = mainPackageJson.version;
+  const packageFileName = packageJson.name.replace(/@/, '').replace(/\//, '-');
+  const fileName = packageFileName + '-' + version;
   taskName = 'pack__' + dirName;
   packageTasks.pack.push(taskName);
   gulp.task(taskName, shell.task([
     'npm pack',
-    'cp *.tgz ' + dirName + '.tgz',
-    'mv ' + dirName + '.tgz ../../'
+    'mv ' + fileName + '.tgz ../../' + dirName + '.tgz'
   ], {cwd: buildOut}));
 
   taskName = 'publish__' + dirName;
