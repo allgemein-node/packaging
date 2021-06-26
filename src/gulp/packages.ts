@@ -307,15 +307,34 @@ for (const path of packages) {
     /**
      * Copies files into the package.
      */
-    taskName = 'package_copy_files__' + dirName;
+    taskName = 'package_copy_bin_files__' + dirName;
+    taskNames.push(taskName);
+    gulp.task(taskName, () => gulp.src([
+      './bin/**',
+      './src/bin/**'
+    ], {cwd: sourcePath, base: 'bin'}).pipe(gulp.dest(buildOut)));
+
+    /**
+     * Copies bin files into the package.
+     */
+    taskName = 'package_copy_bin_files__' + dirName;
+    taskNames.push(taskName);
+    gulp.task(taskName, () => gulp.src([
+      './bin/**',
+      './src/bin/**'
+    ], {cwd: sourcePath}).pipe(gulp.dest(buildOut + '/bin')));
+
+    taskName = 'package_copy_README__' + dirName;
     taskNames.push(taskName);
     gulp.task(taskName, () => gulp.src([
       './README.md',
-      './src/**/files/*',
-      './bin/*',
-      './src/bin/*',
-      './src/**/*.json'
     ], {cwd: sourcePath}).pipe(gulp.dest(buildOut)));
+
+    taskName = 'package_copy_others__' + dirName;
+    taskNames.push(taskName);
+    gulp.task(taskName, () => gulp.src([
+      './**/*.json',
+    ], {cwd: sourcePath + '/src', base: '.'}).pipe(gulp.dest(buildOut)));
 
     /**
      * Test
