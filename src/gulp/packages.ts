@@ -331,7 +331,8 @@ for (const path of packages) {
     taskNames.push(taskName);
     gulp.task(taskName, () => gulp.src([
       './**/*.json',
-    ], {cwd: sourcePath + '/src', base: '.'})
+      '!./**/package.json',
+    ], {cwd: sourcePath + '/src/'})
       .pipe(gulp.dest(buildOut)));
 
     /**
