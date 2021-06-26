@@ -341,7 +341,7 @@ for (const path of packages) {
    */
   const outPackagePath = join(buildOut, 'package.json');
   taskName = 'package_apply_version__' + dirName;
-  packageNames.push(taskName);
+  taskNames.push(taskName);
   gulp.task(taskName, () => {
     const version = mainPackageJson.version;
     return gulp.src(outPackagePath)
