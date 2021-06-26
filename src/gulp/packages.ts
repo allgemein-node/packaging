@@ -313,6 +313,7 @@ for (const path of packages) {
       './README.md',
       './src/**/files/*',
       './bin/*',
+      './src/bin/*',
       './src/**/*.json'
     ], {cwd: sourcePath}).pipe(gulp.dest(buildOut)));
 
