@@ -325,15 +325,17 @@ for (const path of packages) {
       .pipe(gulp.dest(buildOut)));
 
     /**
-     * Copy other json files
+     * Copy other json/js files
      */
     taskName = 'package_copy_others__' + dirName;
     taskNames.push(taskName);
     gulp.task(taskName, () => gulp.src([
       './**/*.json',
+      './**/*.js',
       '!./**/package.json',
     ], {cwd: sourcePath + '/src/'})
       .pipe(gulp.dest(buildOut)));
+
 
     /**
      * Test
