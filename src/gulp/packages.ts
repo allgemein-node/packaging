@@ -126,13 +126,15 @@ const packageTasks: { [k: string]: string[] } = {
   'test': [],
   // eslint-disable-next-line @typescript-eslint/naming-convention
   'packages_publish': [],
-  'pack': []
+  'pack': [],
+  'dist-tag': [],
 };
 
 const packageNames = packageTasks['packages'];
 const updateDeps = packageTasks['update_dependencies'];
 const testDeps = packageTasks['test'];
 const publishDeps = packageTasks['packages_publish'];
+const distTags = packageTasks['dist-tag'];
 
 for (const path of packages) {
   const dirName = path.match(/packages\/(.*)\/package/)[1];
@@ -385,9 +387,21 @@ for (const path of packages) {
     'mv ' + fileName + '.tgz ../../' + dirName + '.tgz'
   ], {cwd: buildOut}));
 
+  /**
+   * Publish task
+   */
   taskName = 'publish__' + dirName;
   publishDeps.push(taskName);
   gulp.task(taskName, shell.task('npm publish --access=public', {cwd: buildOut}));
+
+  if (mainPackageJson.tag) {
+    /**
+     * Dist tag task if global tag present
+     */
+    taskName = 'dist-tag__' + dirName;
+    distTags.push(taskName);
+    gulp.task(taskName, shell.task('npm dist-tag add ' + packageJson.name + '@' + version + ' ' + mainPackageJson.tag, {cwd: buildOut}));
+  }
 
 }
 
