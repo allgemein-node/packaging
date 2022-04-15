@@ -128,6 +128,7 @@ const packageTasks: { [k: string]: string[] } = {
   'packages_publish': [],
   'pack': [],
   'dist-tag': [],
+  'cleanup': []
 };
 
 const packageNames = packageTasks['packages'];
@@ -135,6 +136,7 @@ const updateDeps = packageTasks['update_dependencies'];
 const testDeps = packageTasks['test'];
 const publishDeps = packageTasks['packages_publish'];
 const distTags = packageTasks['dist-tag'];
+const cleanup = packageTasks['cleanup'];
 
 for (const path of packages) {
   const dirName = path.match(/packages\/(.*)\/package/)[1];
@@ -150,8 +152,14 @@ for (const path of packages) {
    */
   let taskName = 'package_cleanup__' + dirName;
   const taskNames = [taskName];
-  gulp.task(taskName, () => del([buildPath + '/**']));
-
+  gulp.task(taskName, () => del([
+    buildPath + '/**',
+    sourcePath + '/node_modules/**',
+    sourcePath + '/node_modules',
+    sourcePath + '/src/node_modules/**',
+    sourcePath + '/src/node_modules'
+  ]));
+  cleanup.push(taskName);
 
   /**
    * Update dependencies in json
@@ -449,6 +457,16 @@ if (fs.existsSync(angularJsonPath)) {
     gulp.task(taskName, shell.task('ng test ' + ngName + ' --code-coverage=true --watch=false'));
   }
 }
+
+
+const sourcePath = resolve('.');
+const taskName = 'package_cleanup';
+gulp.task(taskName, () => del([
+  sourcePath + '/node_modules/**',
+  sourcePath + '/node_modules',
+  sourcePath + '/package-lock.json'
+]));
+cleanup.push(taskName);
 
 
 for (const taskGroup of keys(packageTasks)) {
