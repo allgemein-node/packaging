@@ -1,5 +1,5 @@
 import {join, resolve} from 'path';
-import {has, isEmpty, keys, set, uniq, unset} from 'lodash';
+import {get, has, isEmpty, keys, set, uniq, unset} from 'lodash';
 import * as glob from 'glob';
 import * as gulp from 'gulp';
 import shell from 'gulp-shell';
@@ -144,6 +144,7 @@ for (const path of packages) {
   const buildTmp = join(buildPath, 'tmp');
   const packageJson = getJson(path);
 
+
   /**
    * cleans build folder.
    */
@@ -188,97 +189,188 @@ for (const path of packages) {
     'update_dependencies_dev__' + dirName
   ));
 
-
-  // const tmpPackagePath = join(buildTmp, 'package.json');
   const angularJsonPath = join(sourcePath, 'angular.json');
-  // const ngPackagePath = join(sourcePath, 'ng-package.json');
-  if (fs.existsSync(angularJsonPath)) {
-    const angularJson = getJson(angularJsonPath);
-    const ngLibName = angularJson.defaultProject;
+  const isNgPackage = fs.existsSync(angularJsonPath);
 
-    taskName = 'package_ng_build__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src(path, {read: false})
-      .pipe(shell('ng build ' + ngLibName, {cwd: sourcePath}))
-      .pipe(
-        through.obj((chunk, enc, callback) => {
-          callback(null, chunk);
-        })
-      ));
+  /** ============================
+   * Testing
+   */
+  if (!get(packageJson, 'packaging.testing', false)) {
+    if (isNgPackage) {
+      const searchPath = join(sourcePath, 'src', '{**,**/**,**/**/**}', '*.spec.ts');
+      const foundTestFiles = glob.sync(searchPath);
+      if (foundTestFiles.length > 0) {
+        const angularJson = getJson(angularJsonPath);
+        const ngLibName = angularJson.defaultProject;
 
-    /**
-     * Tests
-     */
-    const searchPath = join(sourcePath, 'src', '{**,**/**,**/**/**}', '*.spec.ts');
-    const foundTestFiles = glob.sync(searchPath);
-    if (foundTestFiles.length > 0) {
-      taskName = 'test__' + dirName;
-      testDeps.push(taskName);
-      if (has(packageJson, 'scripts.test')) {
-        gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
-      } else {
-        gulp.task(taskName, shell.task('ng test ' + ngLibName + ' --code-coverage=true --watch=false', {cwd: sourcePath}));
+        taskName = 'test__' + dirName;
+        testDeps.push(taskName);
+        if (has(packageJson, 'scripts.test')) {
+          gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
+        } else {
+          gulp.task(taskName, shell.task('ng test ' + ngLibName + ' --code-coverage=true --watch=false', {cwd: sourcePath}));
+        }
+        if (has(packageJson, 'scripts.posttest')) {
+          taskName = 'posttest__' + dirName;
+          gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
+        }
       }
-      if (has(packageJson, 'scripts.posttest')) {
-        taskName = 'posttest__' + dirName;
-        gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
+    } else {
+      const searchPath = join(sourcePath, 'test', '{**,**/**,**/**/**}', '*.spec.ts');
+      const foundTestFiles = glob.sync(searchPath);
+      if (foundTestFiles.length > 0) {
+        taskName = 'test__' + dirName;
+        testDeps.push(taskName);
+        if (has(packageJson, 'scripts.test')) {
+          gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
+        } else {
+          gulp.task(taskName, shell.task('mocha ' + join('test', '{**,**/**,**/**/**}', '*.spec.ts'), {cwd: sourcePath}));
+        }
+        if (has(packageJson, 'scripts.posttest')) {
+          taskName = 'posttest__' + dirName;
+          gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
+        }
       }
     }
+  }
 
-  } else {
+  /** ============================
+   * Packaging
+   */
+  if (!get(packageJson, 'packaging.disable', false)) {
+    // const tmpPackagePath = join(buildTmp, 'package.json');
+    // const ngPackagePath = join(sourcePath, 'ng-package.json');
+    if (isNgPackage) {
+      const angularJson = getJson(angularJsonPath);
+      const ngLibName = angularJson.defaultProject;
 
-    taskName = 'package_nodejs__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src(path)
-      .pipe(through.obj(function (file, enc, cb) {
-
-        if (file.isNull()) {
-          return cb(null, file);
-        }
-        if (file.isStream()) {
-          return cb(new Error('Json Streaming not supported'));
-        }
-        const json = JSON.parse(String(file.contents));
-        unset(json, '$schema');
-        unset(json, 'private');
-        set(json, 'main', 'index.js');
-        set(json, 'browser', 'browser.js');
-        file.contents = new Buffer(JSON.stringify(json, null, 2));
-        cb(null, file);
-      }))
-      .pipe(gulp.dest(buildOut)));
+      taskName = 'package_ng_build__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src(path, {read: false})
+        .pipe(shell('ng build ' + ngLibName, {cwd: sourcePath}))
+        .pipe(
+          through.obj((chunk, enc, callback) => {
+            callback(null, chunk);
+          })
+        ));
 
 
-    /**
-     * Copies all sources to the package directory.
-     */
-    taskName = 'package_compile__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => {
-      const tsProject = ts.createProject('tsconfig.json');
-      const tsResult = gulp.src([
-        './src/**/*.ts',
-        '!./src/**/files/*.ts',
-        '!./src/**/files/**/*.ts',
-        '!./src/app/**',
-        '!./src/modules/*/*.ts',
-        '!./src/modules/*/!(api|entities)/*.ts',
-        '!./src/modules/*/!(api|entities)/**/*.ts',
-        '!./src/public_api.ts',
-        './src/modules/*/+(api|entities)/*.ts',
-        './src/modules/*/+(api|entities)/**/*.ts',
-        '!./src/modules/app/**/*.ts',
+    } else {
+
+      taskName = 'package_nodejs__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src(path)
+        .pipe(through.obj(function (file, enc, cb) {
+
+          if (file.isNull()) {
+            return cb(null, file);
+          }
+          if (file.isStream()) {
+            return cb(new Error('Json Streaming not supported'));
+          }
+          const json = JSON.parse(String(file.contents));
+          unset(json, '$schema');
+          unset(json, 'private');
+          set(json, 'main', 'index.js');
+          set(json, 'browser', 'browser.js');
+          file.contents = new Buffer(JSON.stringify(json, null, 2));
+          cb(null, file);
+        }))
+        .pipe(gulp.dest(buildOut)));
+
+
+      /**
+       * Copies all sources to the package directory.
+       */
+      taskName = 'package_compile__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => {
+        const tsProject = ts.createProject('tsconfig.json');
+        const tsResult = gulp.src([
+          './src/**/*.ts',
+          '!./src/**/files/*.ts',
+          '!./src/**/files/**/*.ts',
+          '!./src/app/**',
+          '!./src/modules/*/*.ts',
+          '!./src/modules/*/!(api|entities)/*.ts',
+          '!./src/modules/*/!(api|entities)/**/*.ts',
+          '!./src/public_api.ts',
+          './src/modules/*/+(api|entities)/*.ts',
+          './src/modules/*/+(api|entities)/**/*.ts',
+          '!./src/modules/app/**/*.ts',
+        ], {cwd: sourcePath})
+          .pipe(sourcemaps.init())
+          .pipe(tsProject());
+
+        return m(
+          tsResult.dts.pipe(gulp.dest(buildOut)),
+          tsResult.js
+            .pipe(sourcemaps.write('.', {sourceRoot: '', includeContent: true}))
+            .pipe(gulp.dest(buildOut))
+        );
+      });
+
+      /**
+       * set package.json with correct version
+       */
+      const outPackagePath = join(buildOut, 'package.json');
+      taskName = 'package_apply_version__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => {
+        const mainPackageJson = getJson();
+        const version = mainPackageJson.version;
+        return gulp.src(outPackagePath)
+          .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
+          .pipe(gulp.dest(buildOut));
+      });
+
+
+      /**
+       * Removes /// <reference from compiled sources.
+       */
+      taskName = 'package_replace_references__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src(join(buildOut, '**', '*.d.ts'))
+        .pipe(replace('/// <reference types="node" />', ''))
+        .pipe(replace('/// <reference types="chai" />', ''))
+        .pipe(gulp.dest(buildOut)));
+
+
+      /**
+       * Copies bin files into the package.
+       */
+      taskName = 'package_copy_bin_files__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src([
+        './bin/**',
+        './src/bin/**'
+      ], {cwd: sourcePath}).pipe(gulp.dest(buildOut + '/bin')));
+
+      /**
+       * Copy README
+       */
+      taskName = 'package_copy_readme__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src([
+        './README.md',
       ], {cwd: sourcePath})
-        .pipe(sourcemaps.init())
-        .pipe(tsProject());
+        .pipe(gulp.dest(buildOut)));
 
-      return m(
-        tsResult.dts.pipe(gulp.dest(buildOut)),
-        tsResult.js
-          .pipe(sourcemaps.write('.', {sourceRoot: '', includeContent: true}))
-          .pipe(gulp.dest(buildOut))
-      );
-    });
+      /**
+       * Copy other json/js files
+       */
+      taskName = 'package_copy_others__' + dirName;
+      taskNames.push(taskName);
+      gulp.task(taskName, () => gulp.src([
+        './**/*.json',
+        './**/*.js',
+        '!./**/package.json',
+      ], {cwd: sourcePath + '/src/'})
+        .pipe(gulp.dest(buildOut)));
+
+
+    }
+
 
     /**
      * set package.json with correct version
@@ -287,7 +379,6 @@ for (const path of packages) {
     taskName = 'package_apply_version__' + dirName;
     taskNames.push(taskName);
     gulp.task(taskName, () => {
-      const mainPackageJson = getJson();
       const version = mainPackageJson.version;
       return gulp.src(outPackagePath)
         .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
@@ -295,114 +386,36 @@ for (const path of packages) {
     });
 
 
-    /**
-     * Removes /// <reference from compiled sources.
-     */
-    taskName = 'package_replace_references__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src(join(buildOut, '**', '*.d.ts'))
-      .pipe(replace('/// <reference types="node" />', ''))
-      .pipe(replace('/// <reference types="chai" />', ''))
-      .pipe(gulp.dest(buildOut)));
+    taskName = 'package__' + dirName;
+    packageNames.push(taskName);
+    gulp.task(taskName, gulp.series(...taskNames));
 
-
-    /**
-     * Copies bin files into the package.
-     */
-    taskName = 'package_copy_bin_files__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src([
-      './bin/**',
-      './src/bin/**'
-    ], {cwd: sourcePath}).pipe(gulp.dest(buildOut + '/bin')));
+    const version = mainPackageJson.version;
+    const packageFileName = packageJson.name.replace(/@/, '').replace(/\//, '-');
+    const fileName = packageFileName + '-' + version;
+    taskName = 'pack__' + dirName;
+    packageTasks.pack.push(taskName);
+    gulp.task(taskName, shell.task([
+      'npm pack',
+      'mv ' + fileName + '.tgz ../../' + dirName + '.tgz'
+    ], {cwd: buildOut}));
 
     /**
-     * Copy README
+     * Publish task
      */
-    taskName = 'package_copy_readme__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src([
-      './README.md',
-    ], {cwd: sourcePath})
-      .pipe(gulp.dest(buildOut)));
+    taskName = 'publish__' + dirName;
+    publishDeps.push(taskName);
+    gulp.task(taskName, shell.task('npm publish --access=public', {cwd: buildOut}));
 
-    /**
-     * Copy other json/js files
-     */
-    taskName = 'package_copy_others__' + dirName;
-    taskNames.push(taskName);
-    gulp.task(taskName, () => gulp.src([
-      './**/*.json',
-      './**/*.js',
-      '!./**/package.json',
-    ], {cwd: sourcePath + '/src/'})
-      .pipe(gulp.dest(buildOut)));
-
-
-    /**
-     * Test
-     */
-    const searchPath = join(sourcePath, 'test', '{**,**/**,**/**/**}', '*.spec.ts');
-    const foundTestFiles = glob.sync(searchPath);
-    if (foundTestFiles.length > 0) {
-      taskName = 'test__' + dirName;
-      testDeps.push(taskName);
-      if (has(packageJson, 'scripts.test')) {
-        gulp.task(taskName, shell.task(packageJson.scripts.test, {cwd: sourcePath}));
-      } else {
-        gulp.task(taskName, shell.task('mocha ' + join('test', '{**,**/**,**/**/**}', '*.spec.ts'), {cwd: sourcePath}));
-      }
-      if (has(packageJson, 'scripts.posttest')) {
-        taskName = 'posttest__' + dirName;
-        gulp.task(taskName, shell.task(packageJson.scripts.posttest, {cwd: sourcePath}));
-      }
+    if (mainPackageJson.tag) {
+      /**
+       * Dist tag task if global tag present
+       */
+      taskName = 'dist-tag__' + dirName;
+      distTags.push(taskName);
+      gulp.task(taskName, shell.task('npm dist-tag add ' + packageJson.name + '@' + version + ' ' + mainPackageJson.tag, {cwd: buildOut}));
     }
   }
-
-  /**
-   * set package.json with correct version
-   */
-  const outPackagePath = join(buildOut, 'package.json');
-  taskName = 'package_apply_version__' + dirName;
-  taskNames.push(taskName);
-  gulp.task(taskName, () => {
-    const version = mainPackageJson.version;
-    return gulp.src(outPackagePath)
-      .pipe(replace(/0\.0\.0\-PLACEHOLDER/g, version))
-      .pipe(gulp.dest(buildOut));
-  });
-
-
-  taskName = 'package__' + dirName;
-  packageNames.push(taskName);
-  gulp.task(taskName, gulp.series(...taskNames));
-
-  const version = mainPackageJson.version;
-  const packageFileName = packageJson.name.replace(/@/, '').replace(/\//, '-');
-  const fileName = packageFileName + '-' + version;
-  taskName = 'pack__' + dirName;
-  packageTasks.pack.push(taskName);
-  gulp.task(taskName, shell.task([
-    'npm pack',
-    'mv ' + fileName + '.tgz ../../' + dirName + '.tgz'
-  ], {cwd: buildOut}));
-
-  /**
-   * Publish task
-   */
-  taskName = 'publish__' + dirName;
-  publishDeps.push(taskName);
-  gulp.task(taskName, shell.task('npm publish --access=public', {cwd: buildOut}));
-
-  if (mainPackageJson.tag) {
-    /**
-     * Dist tag task if global tag present
-     */
-    taskName = 'dist-tag__' + dirName;
-    distTags.push(taskName);
-    gulp.task(taskName, shell.task('npm dist-tag add ' + packageJson.name + '@' + version + ' ' + mainPackageJson.tag, {cwd: buildOut}));
-  }
-
 }
 
 
