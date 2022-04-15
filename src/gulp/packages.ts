@@ -195,7 +195,7 @@ for (const path of packages) {
   /** ============================
    * Testing
    */
-  if (!get(packageJson, 'packaging.testing', false)) {
+  if (get(packageJson, 'packaging.testing', true)) {
     if (isNgPackage) {
       const searchPath = join(sourcePath, 'src', '{**,**/**,**/**/**}', '*.spec.ts');
       const foundTestFiles = glob.sync(searchPath);
