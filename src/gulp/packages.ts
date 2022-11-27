@@ -279,8 +279,16 @@ for (const path of packages) {
           const json = JSON.parse(String(file.contents));
           unset(json, '$schema');
           unset(json, 'private');
-          set(json, 'main', 'index.js');
-          set(json, 'browser', 'browser.js');
+
+          const main = get(json, 'main', null);
+          if (!main) {
+            set(json, 'main', 'index.js');
+          }
+
+          const browser = get(json, 'browser', null);
+          if (!browser) {
+            set(json, 'browser', 'browser.js');
+          }
           file.contents = new Buffer(JSON.stringify(json, null, 2));
           cb(null, file);
         }))
