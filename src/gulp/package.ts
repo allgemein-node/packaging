@@ -2,7 +2,6 @@ import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
 import shell from 'gulp-shell';
 import {resolve} from 'path';
-import * as sourcemaps from 'gulp-sourcemaps';
 import replace from 'gulp-replace';
 
 const m = require('merge-stream');
@@ -21,13 +20,11 @@ gulp.task('packageCompile', () => {
     './src/**/*.ts',
     '!./src/**/files/*.ts',
   ])
-    .pipe(sourcemaps.init())
     .pipe(tsProject());
 
   return m(
     tsResult.dts.pipe(gulp.dest('./build/package')),
     tsResult.js
-      .pipe(sourcemaps.write('.', {sourceRoot: '', includeContent: true}))
       .pipe(gulp.dest('./build/package'))
   );
 });

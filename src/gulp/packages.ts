@@ -8,7 +8,6 @@ import * as fs from 'fs';
 import del from 'del';
 import replace from 'gulp-replace';
 import * as ts from 'gulp-typescript';
-import * as sourcemaps from 'gulp-sourcemaps';
 import {getJson, sortByDependencies} from './functions';
 
 const m = require('merge-stream');
@@ -315,13 +314,11 @@ for (const path of packages) {
           './src/modules/*/+(api|entities)/**/*.ts',
           '!./src/modules/app/**/*.ts',
         ], {cwd: sourcePath})
-          .pipe(sourcemaps.init())
           .pipe(tsProject());
 
         return m(
           tsResult.dts.pipe(gulp.dest(buildOut)),
           tsResult.js
-            .pipe(sourcemaps.write('.', {sourceRoot: '', includeContent: true}))
             .pipe(gulp.dest(buildOut))
         );
       });
