@@ -441,7 +441,7 @@ if (foundTestFiles.length > 0) {
   const name = json.name.replace(/^@/, '').replace(/[^\w]+/g, '-');
   const taskName = 'test__' + name + +'__nodejs';
   testDeps.push(taskName);
-  gulp.task(taskName, shell.task('nyc mocha test/{**,**/**}/*.spec.ts'));
+  gulp.task(taskName, shell.task('mocha test/{**,**/**}/*.spec.ts'));
 }
 
 
